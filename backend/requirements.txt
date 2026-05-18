@@ -1,0 +1,12 @@
+pandas
+numpy
+matplotlib
+seaborn
+scikit-learn
+xgboost
+flask
+flask-cors
+python-dotenv
+pymongo
+joblib
+requests
