@@ -1,10 +1,16 @@
 import os
+import sys
 from pathlib import Path
 from datetime import datetime
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import pandas as pd
 import joblib
+# Ensure project root is on sys.path so top-level packages (like `api`) resolve
+ROOT_DIR = Path(__file__).resolve().parents[1]
+if str(ROOT_DIR) not in sys.path:
+    sys.path.insert(0, str(ROOT_DIR))
+
 try:
     from backend.preprocess import preprocess
     from backend.model_utils import create_prediction_response
@@ -13,7 +19,8 @@ except ImportError:
     from preprocess import preprocess
     from model_utils import create_prediction_response
     from db import log_alert
-from api.weather_api import fetch_weather_data
+
+from api.weather_api import fetch_weather_data, fetch_current_weather
 
 PROJECT_ROOT = Path(__file__).resolve().parents[1]
 MODEL_PATH = PROJECT_ROOT / 'models' / 'groundwater_model.pkl'
@@ -114,6 +121,21 @@ def weather_data():
     try:
         weather = fetch_weather_data(latitude, longitude)
         return jsonify({'status': 'ok', 'weather': weather})
+    except Exception as exc:
+        return jsonify({'error': str(exc)}), 500
+
+
+@app.route('/current-weather', methods=['GET'])
+def current_weather():
+    """Return simplified current weather metrics for a location.
+
+    Query params: lat, lon (defaults set)
+    """
+    latitude = request.args.get('lat', default='22.57')
+    longitude = request.args.get('lon', default='88.36')
+    try:
+        data = fetch_current_weather(latitude, longitude)
+        return jsonify(data)
     except Exception as exc:
         return jsonify({'error': str(exc)}), 500
 

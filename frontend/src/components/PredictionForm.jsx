@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Api from '../api/Api'
 
 const defaultState = {
@@ -15,6 +15,26 @@ function PredictionForm() {
   const [result, setResult] = useState(null)
   const [error, setError] = useState(null)
   const [loading, setLoading] = useState(false)
+  const [liveLoading, setLiveLoading] = useState(false)
+  const [liveError, setLiveError] = useState(null)
+
+  useEffect(() => {
+    // auto-fill the Temperature field from backend `/current-weather` if available
+    const fetchLive = async () => {
+      setLiveLoading(true)
+      try {
+        const json = await Api.get('/current-weather')
+        if (json.temperature !== null && json.temperature !== undefined) {
+          setForm((s) => ({ ...s, Temperature: json.temperature }))
+        }
+      } catch (err) {
+        setLiveError(err?.error || err?.message || 'Live weather unavailable')
+      } finally {
+        setLiveLoading(false)
+      }
+    }
+    fetchLive()
+  }, [])
 
   const handleChange = (key) => (event) => {
     setForm({ ...form, [key]: event.target.value })
@@ -26,11 +46,28 @@ function PredictionForm() {
     setResult(null)
     setLoading(true)
 
+    const payload = {
+      Rainfall: parseFloat(form.Rainfall),
+      Temperature: parseFloat(form.Temperature),
+      Humidity: parseFloat(form.Humidity),
+      Soil_Moisture: parseFloat(form.Soil_Moisture),
+      Water_Usage: parseFloat(form.Water_Usage),
+      Season: form.Season,
+    }
+
+    if (Object.values(payload).slice(0, 5).some((value) => Number.isNaN(value))) {
+      setError('Please enter valid numeric values for all input fields.')
+      setLoading(false)
+      return
+    }
+
     try {
-      const { data } = await Api.post('/predict', form)
+      const data = await Api.post('/predict', payload)
       setResult(data)
     } catch (err) {
-      setError(err.error || 'Prediction failed — check backend')
+      console.error('Prediction error', err)
+      const message = err?.error || err?.message || JSON.stringify(err)
+      setError(message || 'Prediction failed — check backend')
     } finally {
       setLoading(false)
     }
@@ -53,6 +90,9 @@ function PredictionForm() {
             />
           </label>
         ))}
+
+        {liveLoading && <p className="text-sm text-slate-400">Fetching live temperature...</p>}
+        {liveError && <p className="text-sm text-rose-400">{liveError}</p>}
 
         <label className="grid gap-2 text-sm text-slate-200">
           Season

@@ -15,6 +15,7 @@ import {
 import StatCard from '../components/StatCard'
 import PredictionForm from '../components/PredictionForm'
 import RiskSummary from '../components/RiskSummary'
+import WeatherCard from '../components/WeatherCard'
 
 const stats = [
   { label: 'Current Groundwater Level', value: '58%', change: '+2.1%' },
@@ -59,7 +60,7 @@ export default function DashboardPage() {
               Future-ready groundwater forecasting for sustainable water security
             </h1>
             <p className="max-w-2xl text-lg text-slate-300">
-              A next-level SIH dashboard with AI risk alerts, visual analytics, and prediction controls that help governments manage groundwater resources smarter.
+              A next-level dashboard with AI risk alerts, visual analytics, and prediction controls that help governments manage groundwater resources smarter.
             </p>
           </div>
           <div className="rounded-[2rem] bg-slate-950/80 p-6 shadow-xl border border-white/10">
@@ -111,6 +112,7 @@ export default function DashboardPage() {
         </div>
 
         <aside className="space-y-6">
+          <WeatherCard />
           <PredictionForm />
           <RiskSummary />
         </aside>

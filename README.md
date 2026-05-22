@@ -46,12 +46,18 @@ npm install
 
 ### Backend
 
-From the project root:
+From the project root (run these commands where `SIH_Groundwater_Project` is the current working directory):
 
 ```bash
+# preprocess data and train (optional if model already exists)
 python backend/preprocess.py
 python backend/train_model.py
+
+# start the backend API (recommended)
 python -m backend.api
+
+# alternatively, you can run the script directly
+python backend/api.py
 ```
 
 The backend runs by default on:

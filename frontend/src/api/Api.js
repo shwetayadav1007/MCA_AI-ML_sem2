@@ -1,12 +1,17 @@
 import axios from 'axios'
 
+const baseURL = import.meta.env.VITE_API_BASE_URL || ''
+
 const Api = axios.create({
-  baseURL: 'http://127.0.0.1:5000',
+  baseURL,
   timeout: 30000,
+  headers: {
+    'Content-Type': 'application/json',
+  },
 })
 
 Api.interceptors.response.use(
-  (res) => res,
+  (res) => res.data,
   (err) => {
     return Promise.reject(err.response ? err.response.data : { error: err.message })
   }
